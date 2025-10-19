@@ -173,7 +173,7 @@ class YTDownloader:
                 format_option = f"{video_format}+{audio_format}/best"
             output_name = 'live_video.%(ext)s' if is_live else 'video.%(ext)s'
         else:
-            format_option = f"{task.get('audio_format', 'bestaudio')}/best"
+            format_option = f"{task.get('audio_format', 'bestaudio')}/bestaudio"
             output_name = 'live_audio.%(ext)s' if is_live else 'audio.%(ext)s'
         
         opts = {
