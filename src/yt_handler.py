@@ -49,7 +49,8 @@ class YTDownloader:
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': False,
-                'skip_download': True
+                'skip_download': True,
+                'extractor_args': { 'youtube': { 'player_client': ['default', '-tv_simply'], }, },
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -77,17 +78,36 @@ class YTDownloader:
     
     def _get_format_size(self, formats: list, format_spec: str, is_video: bool) -> int:
         if format_spec == 'bestvideo':
-            filtered = [f for f in formats if f.get('vcodec') != 'none' and f.get('acodec') == 'none']
+            filtered = [f for f in formats if f.get('vcodec') and f.get('vcodec') != 'none']
         elif format_spec == 'bestaudio':
-            filtered = [f for f in formats if f.get('acodec') != 'none' and f.get('vcodec') == 'none']
+            filtered = [f for f in formats if f.get('acodec') and f.get('acodec') != 'none']
         else:
             filtered = [f for f in formats if f.get('format_id') == format_spec]
         
         if not filtered:
+            if is_video:
+                filtered = [f for f in formats if f.get('vcodec') != 'none']
+            else:
+                filtered = [f for f in formats if f.get('acodec') != 'none']
+        
+        if not filtered:
             return 0
         
-        best = max(filtered, key=lambda f: f.get('filesize') or f.get('filesize_approx', 0))
-        return best.get('filesize') or best.get('filesize_approx', 0)
+        best = max(filtered, key=lambda f: (f.get('filesize') or f.get('filesize_approx') or 0, f.get('tbr') or 0, f.get('height') or 0 if is_video else f.get('abr') or 0))
+        
+        size = best.get('filesize') or best.get('filesize_approx', 0)
+        
+        if size == 0:
+            duration = best.get('duration', 0)
+            if is_video:
+                bitrate = best.get('tbr') or best.get('vbr') or 0
+            else:
+                bitrate = best.get('abr') or best.get('tbr') or 0
+            
+            if duration > 0 and bitrate > 0:
+                size = int(bitrate * duration * 128)
+        
+        return size
     
     def download_info(self, task_id: str):
         try:
