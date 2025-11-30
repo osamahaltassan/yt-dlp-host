@@ -17,7 +17,7 @@ The API will be available at `http://localhost:5000`.
 
 On first run, an admin API key is automatically generated. Retrieve it from:
 ```bash
-cat /path/to/data/jsons/api_keys.json
+docker exec yt-dlp-api cat /data/jsons/api_keys.json
 ```
 
 ## Configuration
