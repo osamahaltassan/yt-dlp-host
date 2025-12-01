@@ -19,4 +19,4 @@ RUN mkdir -p /data/downloads /data/jsons && \
 
 EXPOSE 5000
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "src.server:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "86400", "src.server:app"]
